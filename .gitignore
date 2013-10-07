@@ -1,0 +1,8 @@
+node_modules
+dist
+.tmp
+.sass-cache
+.settings
+.project
+.claspath
+app/bower_components

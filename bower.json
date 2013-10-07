@@ -1,0 +1,10 @@
+{
+  "name": "futuron",
+  "version": "0.0.0",
+  "dependencies": {
+    "jquery": "~1.10.2",
+    "underscore": "~1.5.2",
+    "jquery.terminal": "~0.7.5"
+  },
+  "devDependencies": {}
+}

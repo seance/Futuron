@@ -1,0 +1,105 @@
+.browsehappy {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+.clearfix:after {
+  display: table;
+  line-height: 0;
+  content: "";
+  clear: both;
+}
+
+body {
+	padding: 20px 100px;
+	background-color: black;
+}
+
+.top {
+	color: #75f8fa;
+	font-family: 'tr2ntr2n';
+	font-size: 4em;
+	margin-bottom: 20px;
+    text-shadow: -1px 1px 16px #75f8fa, 1px -1px 16px #75f8fa;
+}
+
+.middle {
+	margin-bottom: 30px;
+}
+
+.grid {
+	float: left;
+	width: 480px;
+	height: 480px;
+	box-shadow: 0 0 50px 15px rgba(255, 255, 255, 0.5);
+	margin-right: 50px;
+}
+
+.grid-square {
+	float: left;
+	width: 8px;
+	height: 8px;
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
+	background-color: #333;
+	box-sizing: border-box;
+	transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.legend {
+	float: left;
+}
+
+.legend-bot {
+	margin-bottom: 10px;
+}
+
+.legend-hue {
+	float: left;
+	width: 15px;
+	height: 15px;
+	margin-right: 10px;
+}
+
+.legend-name {
+	float: left;
+	color: white;
+	line-height: 15px;
+	font-family: FreeMono, monospace;
+	text-shadow: 0 0 15px white;
+}
+
+.legend-bot.dead .legend-name {
+	color: #aaa;
+	text-decoration: line-through;
+}
+
+#futuron .terminal {
+	color: #75f8fa;
+	text-shadow: -1px 1px 4px #75f8fa, 1px -1px 4px #75f8fa;
+}
+
+#futuron .cmd {
+	margin-top: 14px;
+}
+
+#futuron .terminal .cmd span.inverted {
+    background-color: #75f8fa;
+    color: #000;
+}
+
+
+/*
+.cmd {
+	margin-top: 10px;
+}
+*/
+/*
+.grid-square[data-x="58"][data-y="59"] {
+	position: relative;
+	z-index: 2;
+	box-shadow: 0px 0px 15px 5px red;
+}
+*/
