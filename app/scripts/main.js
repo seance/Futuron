@@ -113,15 +113,16 @@ var Grid = (function() {
 		},
 		updateBotPosition: function(bot) {
 			var x = bot.pos[0], y = bot.pos[1]
+			
 			$('.grid-square[data-x="'+x+'"][data-y="'+y+'"]').css({
 				'background-color': 'hsl('+bot.hue+', 100%, 50%)',
 				'box-shadow': '0 0 5px hsl('+bot.hue+', 100%, 50%)',
 				'position': 'relative',
-				'z-index': 2
-			})
+				'z-index': 3
+			}).removeClass('pulse')
 		},
 		removeBotTrail: function(bot) {
-			_.each(bot.trail, function(pos) {
+			_.each(bot.trail, function(pos, index) {
 				var x = pos[0], y = pos[1]
 				setTimeout(function() {
 					$('.grid-square[data-x="'+x+'"][data-y="'+y+'"]').css({
@@ -141,6 +142,12 @@ var Grid = (function() {
 				'position': '',
 				'z-index': ''
 			})
+		},
+		pulseSquare: function(x, y) {
+			$('.grid-square[data-x="'+x+'"][data-y="'+y+'"]').addClass('pulse')
+			setTimeout(function() {
+				$('.grid-square[data-x="'+x+'"][data-y="'+y+'"]').removeClass('pulse')
+			}, 5000)
 		}
 	}
 })()
@@ -278,9 +285,21 @@ window.Futuron = (function() {
 		if (aliveBots <= 0) clearInterval(tick)
 	}
 	
+	var initGridPulse = function() {
+		setInterval(function() {
+			var x = randomInt(), y = randomInt()
+			if (!_.some(arena, function(wall) {
+				return wall[0] === x && wall[1] === y
+			})) {
+				Grid.pulseSquare(x, y)
+			}
+		}, 100)
+	}
+	
 	return {
 		init: function(size, term, grid, legend) {
 			SIZE = size
+			initGridPulse()
 			Term.init(term)
 			Grid.init(grid, legend, size)
 		},
@@ -302,6 +321,7 @@ window.Futuron = (function() {
 		derez: function(ids) {
 			_.each(ids, function(id) {
 				removeBot(parseInt(id), function(bot) {
+					bot.worker.terminate()
 					Grid.removeBotTrail(bot)
 					Grid.removeBotLegend(bot)
 					Term.echo('Derezzed bot ' + id)
