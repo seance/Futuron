@@ -206,6 +206,7 @@ window.Futuron = (function() {
 		var bot = _.findWhere(bots, {id: id})
 		
 		if (bot) {
+			bot.worker.terminate()
 			bots = _.without(bots, bot);
 			removed(bot)
 		}
@@ -321,7 +322,6 @@ window.Futuron = (function() {
 		derez: function(ids) {
 			_.each(ids, function(id) {
 				removeBot(parseInt(id), function(bot) {
-					bot.worker.terminate()
 					Grid.removeBotTrail(bot)
 					Grid.removeBotLegend(bot)
 					Term.echo('Derezzed bot ' + id)
