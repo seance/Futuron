@@ -1,30 +1,38 @@
 ;(function($) {
 
-var Loader = {
-	loadWorkerUrl: function(url, success, error) {
-		$.ajax({
-			url: url,
-			dataType: 'text',
-			error: error,
-			success: function(data) {
-				success(new Worker(URL.createObjectURL(new Blob([data]))))
-			}
-		})
-	},
-	loadWorkerRemote: function(ip, success, error) {
-		Loader.loadWorkerUrl('http://' + ip + ':9000/scripts/bot.js', success, error)
-	},
-	loadWorkerLocal: function(name, success, error) {
-		Loader.loadWorkerUrl('scripts/' + name + '.js', success, error)
-	},
-	loadWorker: function(spec, success, error) {
-		Loader.loadWorkerLocal(spec, success, function() {
-			Loader.loadWorkerRemote(spec, success, function() {
-				Loader.loadWorkerUrl(spec, success, error)
-			})
-		})
+var Loader = (function() {
+	var wrapWorkerTemplate = function(w) {
+		return _.template($('#worker-template').html(), { body: w })
 	}
-}
+
+	return {
+		loadWorkerUrl: function(url, success, error) {
+			$.ajax({
+				url: url,
+				dataType: 'text',
+				error: error,
+				success: function(data) {
+					success(new Worker(URL.createObjectURL(new Blob([
+						wrapWorkerTemplate(data)
+					]))))
+				}
+			})
+		},
+		loadWorkerRemote: function(ip, success, error) {
+			Loader.loadWorkerUrl('http://' + ip + ':9000/scripts/bot.js', success, error)
+		},
+		loadWorkerLocal: function(name, success, error) {
+			Loader.loadWorkerUrl('scripts/' + name + '.js', success, error)
+		},
+		loadWorker: function(spec, success, error) {
+			Loader.loadWorkerLocal(spec, success, function() {
+				Loader.loadWorkerRemote(spec, success, function() {
+					Loader.loadWorkerUrl(spec, success, error)
+				})
+			})
+		}
+	}
+})()
 
 var Term = (function() {
 	var TERM, parseArgs = function(s) {
@@ -158,7 +166,7 @@ var Handler = (function() {
 	}
 
 	return {
-		createHandler: function(bot, worker, complete) {
+		createHandler: function(bot, worker, size, complete) {
 			worker.onmessage = function(m) {
 				switch (m.data.cmd) {
 					case 'name':
@@ -172,7 +180,10 @@ var Handler = (function() {
 				}	
 			}
 
-			worker.postMessage({ cmd: 'name' })
+			worker.postMessage({ cmd: 'name', args: {
+				url: document.location.href,
+				size: size
+			}})
 		}
 	}
 })()
@@ -196,7 +207,7 @@ window.Futuron = (function() {
 		
 		bot.state = { pos: [bot.pos[0], bot.pos[1]] }
 		
-		Handler.createHandler(bot, worker, function(bot) {
+		Handler.createHandler(bot, worker, SIZE, function(bot) {
 			bots.push(bot)
 			complete(bot)
 		})

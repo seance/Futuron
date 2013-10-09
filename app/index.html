@@ -44,5 +44,56 @@
         <!-- build:js scripts/main.js -->
         <script src="scripts/main.js"></script>
         <!-- endbuild -->
-</body>
+	</body>
+	
+	<script id="worker-template" type="text/js-worker-template">
+		;(function() {
+			var size = 0
+		
+			var loadLibraries = function(url) {
+				importScripts(url + 'bower_components/underscore/underscore.js')
+			}
+			
+			var initialize = function(spec) {
+				size = spec.size
+				loadLibraries(spec.url)
+			}
+			
+			var makeLook = function(arena) {
+				return function(pos) {
+					var x = pos[0], y = pos[1]
+					return (x < 0) || (x >= size) || (y < 0) || (y >= size) ||
+						_.some(arena, function(wall) {
+							return wall[0] === x && wall[1] === y
+						})
+				}
+			}
+			
+			var turnLeft = function(dir) {
+				return [dir[1], -dir[0]]
+			}
+			
+			var turnRight = function(dir) {
+				return [-dir[1], dir[0]]
+			}
+			
+			// INJECTED BOT CODE
+			<%= body %>
+	
+			onmessage = function(m) {
+				switch (m.data.cmd) {
+					case 'name':
+						initialize(m.data.args)
+						postMessage({cmd: 'name', args: name})
+						break
+					case 'move':
+						postMessage({ cmd: 'move', args:
+							strategy(makeLook(m.data.args.arena), m.data.args.state)
+						})
+						break
+					default:
+				}
+			}
+		})()
+	</script>
 </html>
