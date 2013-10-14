@@ -77,19 +77,26 @@
 				return [-dir[1], dir[0]]
 			}
 			
-			// INJECTED BOT CODE
-			<%= body %>
+			var W = (function() {
+				// INJECTED BOT CODE
+				<%= body %>
+				
+				return {
+					name: name,
+					strategy: strategy
+				}
+			})()
 	
 			onmessage = function(m) {
 				switch (m.data.cmd) {
 					case 'name':
 						initialize(m.data.args)
-						postMessage({cmd: 'name', args: name})
+						postMessage({cmd: 'name', args: W.name})
 						break
 					case 'move':
 						postMessage({ cmd: 'recv', args: m.data.args.echo })
 						postMessage({ cmd: 'move', args:
-							strategy(makeLook(m.data.args.arena), m.data.args.state)
+							W.strategy(makeLook(m.data.args.arena), m.data.args.state)
 						})
 						break
 					default:
