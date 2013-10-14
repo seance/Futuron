@@ -417,7 +417,8 @@ var Term = (function() {
 	}
 	
 	var term = opts.$terminal.terminal(parseCommand, {
-		greetings: 'F U T U R O N - 5 1 1',
+		greetings: 'F U T U R O N - 5 1 1\n'+
+		           'MCP Ready\n',
 		prompt: '$ ',
 		height: opts.termHeight
 	})
