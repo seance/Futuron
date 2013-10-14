@@ -55,7 +55,7 @@ var Loader = (function() {
 	}
 	
 	function loadRemote(ip, success, error) {
-		loadUrl('http://' + ip + ':9000/scripts/bot.js', success, error)
+		loadUrl('http://' + ip + ':8000/scripts/bot.js', success, error)
 	}
 	
 	function loadLocal(name, success, error) {
