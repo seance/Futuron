@@ -70,7 +70,7 @@ var Term = (function() {
 			}, {
 				greetings: 'F U T U R O N - 5 1 1\nMCP loaded.\n',
 				prompt: '$ ',
-				height: 200
+				height: 100
 			})
 		},
 		echo: function(m) {
@@ -266,7 +266,7 @@ window.Futuron = (function() {
 		}
 		
 		var move = bot.state.pos, pos = bot.pos
-	
+		
 		return move &&
 			   withinBounds(move[0]) &&
 			   withinBounds(move[1]) &&
@@ -348,8 +348,10 @@ window.Futuron = (function() {
 			requestBotMoves()
 			clearInterval(tick)
 			tick = setInterval(function() {
-				processTick(Term, Grid)
-				requestBotMoves()
+				requestAnimationFrame(function() {
+					processTick(Term, Grid)
+					requestBotMoves()
+				})
 			}, 100)
 		},
 		
