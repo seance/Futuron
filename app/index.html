@@ -87,6 +87,7 @@
 						postMessage({cmd: 'name', args: name})
 						break
 					case 'move':
+						postMessage({ cmd: 'recv', args: m.data.args.echo })
 						postMessage({ cmd: 'move', args:
 							strategy(makeLook(m.data.args.arena), m.data.args.state)
 						})
