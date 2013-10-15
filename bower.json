@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "dependencies": {
     "jquery": "~1.10.2",
-    "underscore": "~1.5.2",
-    "jquery.terminal": "~0.7.5"
+    "jquery.terminal": "0.7.5",
+    "lodash": "2.2.1"
   },
   "devDependencies": {}
 }
