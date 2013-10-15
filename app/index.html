@@ -35,7 +35,7 @@
         <!-- build:js scripts/vendor.js -->
         <!-- bower:js -->
         <script src="bower_components/jquery/jquery.js"></script>
-        <script src="bower_components/underscore/underscore.js"></script>
+        <script src="bower_components/lodash/dist/lodash.compat.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 		
@@ -46,20 +46,78 @@
         <!-- endbuild -->
 	</body>
 	
+	<!-- Helpers for interactive bot development -->
+	<script>
+		var size = 60
+		
+		var directions = [[1, 0], [-1, 0], [0, -1], [0, 1]]
+		
+		function look(pos) {
+			var x = pos[0], y = pos[1]
+			return (x < 0) || (x >= size) || (y < 0) || (y >= size)
+		}
+		
+		function move(pos, delta) {
+			return [pos[0] + delta[0], pos[1] + delta[1]]
+		}
+			
+		function turnLeft(dir) {
+			return [dir[1], -dir[0]]
+		}
+			
+		function turnRight(dir) {
+			return [-dir[1], dir[0]]
+		}
+		
+		_.mixin({
+			'indexOf': _.wrap(_.indexOf, function(fn, array, value, fromIndex) {
+				// use original `_.indexOf` if the value is a primitive
+				if (!_.isObject(value)) {
+					return fn(array, value, fromIndex);
+				}
+				return _.findIndex(fromIndex ? array.slice(fromIndex) : array, function(other) {
+					if (Array.isArray(value) && Array.isArray(other)) {
+						return value[0] === other[0] && value[1] === other[1]
+					}
+					else return _.isEqual(value, other)
+				});
+			})
+		});
+	</script>
+	
+	<!-- Worker template for managing messaging & init -->
 	<script id="worker-template" type="text/js-worker-template">
 		;(function() {
 			var size = 0
 		
-			var loadLibraries = function(url) {
-				importScripts(url + 'bower_components/underscore/underscore.js')
+			function loadLibraries(url) {
+				importScripts(url + 'bower_components/lodash/dist/lodash.compat.js')
 			}
 			
-			var initialize = function(spec) {
+			function mixinLodashIndexOf() {
+				_.mixin({
+  					'indexOf': _.wrap(_.indexOf, function(fn, array, value, fromIndex) {
+    					// use original `_.indexOf` if the value is a primitive
+    					if (!_.isObject(value)) {
+      						return fn(array, value, fromIndex);
+    					}
+    					return _.findIndex(fromIndex ? array.slice(fromIndex) : array, function(other) {
+    						if (Array.isArray(value) && Array.isArray(other)) {
+    							return value[0] === other[0] && value[1] === other[1]
+      						}
+      						else return _.isEqual(value, other)
+    					});
+  					})
+				});
+			}
+			
+			function initialize(spec) {
 				size = spec.size
 				loadLibraries(spec.url)
+				mixinLodashIndexOf()
 			}
 			
-			var makeLook = function(arena) {
+			function makeLook(arena) {
 				return function(pos) {
 					var x = pos[0], y = pos[1]
 					return (x < 0) || (x >= size) || (y < 0) || (y >= size) ||
@@ -69,11 +127,17 @@
 				}
 			}
 			
-			var turnLeft = function(dir) {
+			var directions = [[1, 0], [-1, 0], [0, -1], [0, 1]]
+			
+			function move(pos, delta) {
+				return [pos[0] + delta[0], pos[1] + delta[1]]
+			}
+			
+			function turnLeft(dir) {
 				return [dir[1], -dir[0]]
 			}
 			
-			var turnRight = function(dir) {
+			function turnRight(dir) {
 				return [-dir[1], dir[0]]
 			}
 			
