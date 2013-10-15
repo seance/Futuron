@@ -10,6 +10,9 @@
  * passed back as such in the next invocation, enabling the bot to store state
  * between invocations if so desired.
  *
+ * Each invocation has a maximum time limit of 100 ms for computing - timeout
+ * will result in crash of your bot. Don't be late!
+ *
  * Helper functions & utilities available:
  *
  *  - look(pos): Returns true if `pos` is obstructed
