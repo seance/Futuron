@@ -10,14 +10,15 @@
  * passed back as such in the next invocation, enabling the bot to store state
  * between invocations if so desired.
  *
- * Helper functions available:
+ * Helper functions & utilities available:
  *
  *  - look(pos): Returns true if `pos` is obstructed
  *  - move(pos, dir): Returns position with `dir` vector applied to `pos`
  *  - turnLeft(forward): Unit vector representing left direction wrt. `forward`
  *  - turnRight(forward): Unit vector representing right direction wrt. `forward`
+ *  - directions: Array containing the 4 cardinal direction unit vectors
  *
- * In addition, Underscore.js is available in the usual `_` variable.
+ * In addition, Lodash.js is available in the usual `_` variable.
  */
    
 var name = "Your bot name"
