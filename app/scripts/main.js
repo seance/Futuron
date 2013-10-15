@@ -471,6 +471,14 @@ var Futuron = (function() {
 	}
 })()
 
+window.Futuron = _.extend({}, Futuron, {
+	Loader: Loader,
+	Handler: Handler,
+	Grid: Grid,
+	Game: Game,
+	Term: Term
+})
+
 })({
 	gridSize:	60,
 	gridScale:	8,
