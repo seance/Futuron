@@ -23,7 +23,7 @@ Futuron terminal
 Futuron is controlled via the on-page command line terminal. The `help` command lists
 the following options:
 
-* `rez` [<spec1> [<specN>...] Used to bring in bot AIs onto the Grid.
+* `rez [<spec1> [<specN>...]` Used to bring in bot AIs onto the Grid.
 
   Each `spec` is resolved to a JavaScript file in a three-step process:
   * As a local file name without extension, or
