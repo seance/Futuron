@@ -80,5 +80,5 @@ The provided Python script enables CORS (Access-Control-Allow-Origin: \*).
 If you want to minify/uglify your bot code first, serve it with CORS enabled form the
 dist directory or another location of your choice.
 
-Once every bot served from a known location, you can use `rez` with IP address or full
+Once every bot is served from a known location, you can use `rez` with IP address or full
 URL to bring in the bots for battle!
