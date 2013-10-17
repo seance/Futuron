@@ -116,6 +116,9 @@ var Handler = (function() {
 								echo: echo
 							}
 						})
+					},
+					terminate: function() {
+						worker.terminate()
 					}
 				})
 			})
@@ -168,6 +171,10 @@ var Grid = (function() {
 		}
 	}
 	
+	function defer(f, delay) {
+		setTimeout(f, delay || 0)
+	}
+	
 	_.each(_.range(0, opts.gridSize * opts.gridSize), function(i) {
 		opts.$grid.append($(_.template(_square, { x: x(i), y: y(i) })))
 	})
@@ -196,8 +203,10 @@ var Grid = (function() {
 		},
 		updateBotIsDead: function(bot) {
 			$legend(bot.id).addClass('dead')
-			_.each(bot.trail, function(pos) {
-				$square(pos[0], pos[1]).css(squareCss(null))
+			_.each(bot.trail, function(pos, index) {
+				defer(function() {
+					$square(pos[0], pos[1]).css(squareCss(null))
+				}, Math.floor(index / 100))
 			})
 		},
 		updateBotIsAlive: function(bot) {
@@ -205,9 +214,11 @@ var Grid = (function() {
 		},
 		removeBot: function(bot) {
 			$legend(bot.id).remove()
-			_.each(bot.trail, function(pos) {
-				$square(pos[0], pos[1]).css(squareCss(null))
-			})
+			_.each(bot.trail, function(pos, index) {
+				defer(function() {
+					$square(pos[0], pos[1]).css(squareCss(null))
+				})
+			}, Math.floor(index / 100))
 		},
 		resetGrid: function() {
 			$('.legend-bot').removeClass('dead')
@@ -229,6 +240,26 @@ var Game = (function() {
 		})
 	}
 	
+	function insertPositionToArena(pos) {
+		var ys = arena[pos[0]] || []
+		ys.push(pos[1])
+		arena[pos[0]] = ys
+	}
+	
+	function removePositionFromArena(pos) {
+		var ys = arena[pos[0]] || []
+		ys = _.without(ys, pos[1])
+		arena[pos[0]] = ys
+	}
+	
+	function arenaContainsPosition(pos) {
+		return _.contains(arena[pos[0]], pos[1])
+	}
+	
+	function removeTrailFromArena(trail) {
+		_.each(trail, removePositionFromArena)
+	}
+	
 	function updateBotState(bot, state) {
 		_.extend(bot.state, state)
 	}
@@ -236,7 +267,7 @@ var Game = (function() {
 	function updateBotPosition(bot) {
 		bot.pos = bot.state.pos
 		bot.trail.push(bot.pos)
-		arena.push(bot.pos)
+		insertPositionToArena(bot.pos)
 		
 		Grid.updateBotPosition(bot)
 	}
@@ -247,14 +278,16 @@ var Game = (function() {
 	
 	function removeBotTrails(dead) {
 		_.each(dead, function(bot) {
-			arena = _.difference(arena, bot.trail)
+			removeTrailFromArena(bot.trail)
 			Grid.updateBotIsDead(bot)
 		})
 	}
 	
 	function requestBotMoves(done) {
-		var receipts = bots.length
-		_.each(bots, function(bot) {
+		var alive = aliveBots(),
+			receipts = alive.length
+			
+		_.each(alive, function(bot) {
 			bot.handler.requestMove(arena, bot.state, function() {
 				(--receipts === 0) && done()
 			})
@@ -272,35 +305,32 @@ var Game = (function() {
 	}
 	
 	function checkBotMove(bot) {
-		function reportFail(check, message) {
-			!check && Term.echo('Bot ' + bot.id + ', ' + bot.name + ', crashed: ' + message)
-			return check
+		function check(bool, message) {
+			!bool && Term.echo('Bot ' + bot.id + ', ' + bot.name + ', crashed: ' + message)
+			return bool
 		}
 		function movedInTime(pos, move) {
-			return reportFail(move && (pos[0] !== move[0] || pos[1] !== move[1]), 'timeout')
+			return move && (pos[0] !== move[0] || pos[1] !== move[1])
 		}
 		function withinBounds(c) {
-			return reportFail(c >= 0 && c < opts.gridSize, 'out of bounds')
+			return c >= 0 && c < opts.gridSize
 		}
 		function legalTransition(pos, move) {
 			function diffByOne(a, b) { return a === b - 1 || a === b + 1 }
-			return reportFail(
-				(pos[0] === move[0] && diffByOne(pos[1], move[1])) ||
-				(pos[1] === move[1] && diffByOne(pos[0], move[0])), 'illegal move')
+			return (pos[0] === move[0] && diffByOne(pos[1], move[1])) ||
+				(pos[1] === move[1] && diffByOne(pos[0], move[0]))
 		}
 		function notCollision(move) {
-			return reportFail(!_.some(arena, function(wall) {
-				return wall[0] === move[0] && wall[1] === move[1]
-			}), 'collision')
+			return !arenaContainsPosition(move)
 		}
 		
 		var pos = bot.pos, move = bot.state.pos
 		
-		return movedInTime(pos, move) &&
-		       withinBounds(move[0]) &&
-		       withinBounds(move[1]) &&
-		       legalTransition(pos, move) &&
-		       notCollision(move)
+		return check(movedInTime(pos, move), 'timeout') &&
+		       check(withinBounds(move[0]), 'out of bounds') &&
+		       check(withinBounds(move[1]), 'out of bounds') &&
+		       check(legalTransition(pos, move), 'illegal move') &&
+		       check(notCollision(move), 'collision')
 	}
 	
 	function processTick() {
@@ -322,18 +352,18 @@ var Game = (function() {
 	
 	function resetArenaAndBots() {
 		arena = []
+		Grid.resetGrid()
 		
 		_.each(bots, function(bot) {
 			bot.alive = true
-			bot.trail = []
 			bot.pos = [randomInSize(), randomInSize()]
+			bot.trail = [bot.pos]
 			bot.state = { pos: bot.pos }
+			insertPositionToArena(bot.pos)
 			
 			Grid.updateBotIsAlive(bot)
 			Grid.updateBotPosition(bot)
 		})
-		
-		Grid.resetGrid()
 	}
 	
 	return {
@@ -361,6 +391,7 @@ var Game = (function() {
 			var bot = _.findWhere(bots, {id: id})
 			
 			if (bot) {
+				bot.handler.terminate()
 				bots = _.without(bots, bot)
 				removed(bot)
 			}
@@ -392,19 +423,19 @@ var Term = (function() {
 	function parseCommand(command, term) {
 		var a;
 		switch (true) {
-			case !!(a = /^rez (.+)$/i.exec(command)):
+			case Boolean(a = /^rez (.+)$/i.exec(command)):
 				Futuron.rez(parseArgs(a[1]))
 				break
-			case !!(a = /^derez (.+)$/i.exec(command)):
+			case Boolean(a = /^derez (.+)$/i.exec(command)):
 				Futuron.derez(parseArgs(a[1]))
 				break
-			case !!(a = /^run$/i.exec(command)):
+			case Boolean(a = /^run$/i.exec(command)):
 				Futuron.run()
 				break
-			case !!(a = /^halt$/i.exec(command)):
+			case Boolean(a = /^halt$/i.exec(command)):
 				Futuron.halt()
 				break
-			case !!(a = /^help$/i.exec(command)):
+			case Boolean(a = /^help$/i.exec(command)):
 				printHelp(term)
 				break
 			default:

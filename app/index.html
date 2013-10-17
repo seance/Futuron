@@ -118,12 +118,10 @@
 			}
 			
 			function makeLook(arena) {
-				return function(pos) {
+				return function look(pos) {
 					var x = pos[0], y = pos[1]
 					return (x < 0) || (x >= size) || (y < 0) || (y >= size) ||
-						_.some(arena, function(wall) {
-							return wall[0] === x && wall[1] === y
-						})
+						_.contains(arena[x], y)
 				}
 			}
 			
