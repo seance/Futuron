@@ -1,169 +1,35 @@
 <!doctype html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html id="futuron" class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>FUTURON</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        <!-- build:css(.tmp) styles/main.css -->
-        <link rel="stylesheet" href="styles/main.css">
-		<link rel="stylesheet" href="styles/jquery.terminal.css">
-		<link rel="stylesheet" href="styles/tr2n.css">
-        <!-- endbuild -->
-    </head>
-    <body>
-        <!--[if lt IE 10]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-        
-        <div class="top">
-        	Futuron
-        </div>
-		<div class="middle clearfix">
-			<div class="grid"></div>
-			<div class="legend"></div>
-		</div>
-		<div class="bottom">
-			<div class="terminal"></div>
-		</div>
+<html class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <title>Futuron</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
-        <!-- build:js scripts/vendor.js -->
-        <!-- bower:js -->
-        <script src="bower_components/jquery/jquery.js"></script>
-        <script src="bower_components/lodash/dist/lodash.compat.js"></script>
-        <!-- endbower -->
-        <!-- endbuild -->
-		
-		<script src="bower_components/jquery.terminal/js/jquery.terminal-0.7.5.js"></script>
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/jquery.terminal/css/jquery.terminal.css">
+    <link rel="stylesheet" href="styles/tr2n.css">
+    <!-- endbower -->
+    <!-- endbuild -->
 
-        <!-- build:js scripts/main.js -->
-        <script src="scripts/main.js"></script>
-        <!-- endbuild -->
-	</body>
-	
-	<!-- Helpers for interactive bot development -->
-	<script>
-		var size = 60
-		
-		var directions = [[1, 0], [-1, 0], [0, -1], [0, 1]]
-		
-		function look(pos) {
-			var x = pos[0], y = pos[1]
-			return (x < 0) || (x >= size) || (y < 0) || (y >= size)
-		}
-		
-		function move(pos, delta) {
-			return [pos[0] + delta[0], pos[1] + delta[1]]
-		}
-			
-		function turnLeft(dir) {
-			return [dir[1], -dir[0]]
-		}
-			
-		function turnRight(dir) {
-			return [-dir[1], dir[0]]
-		}
-		
-		_.mixin({
-			'indexOf': _.wrap(_.indexOf, function(fn, array, value, fromIndex) {
-				// use original `_.indexOf` if the value is a primitive
-				if (!_.isObject(value)) {
-					return fn(array, value, fromIndex);
-				}
-				return _.findIndex(fromIndex ? array.slice(fromIndex) : array, function(other) {
-					if (Array.isArray(value) && Array.isArray(other)) {
-						return value[0] === other[0] && value[1] === other[1]
-					}
-					else return _.isEqual(value, other)
-				});
-			})
-		});
-	</script>
-	
-	<!-- Worker template for managing messaging & init -->
-	<script id="worker-template" type="text/js-worker-template">
-		;(function() {
-			var size = 0
-		
-			function loadLibraries(url) {
-				importScripts(url + 'bower_components/lodash/dist/lodash.compat.js')
-			}
-			
-			function mixinLodashIndexOf() {
-				_.mixin({
-  					'indexOf': _.wrap(_.indexOf, function(fn, array, value, fromIndex) {
-    					// use original `_.indexOf` if the value is a primitive
-    					if (!_.isObject(value)) {
-      						return fn(array, value, fromIndex);
-    					}
-    					return _.findIndex(fromIndex ? array.slice(fromIndex) : array, function(other) {
-    						if (Array.isArray(value) && Array.isArray(other)) {
-    							return value[0] === other[0] && value[1] === other[1]
-      						}
-      						else return _.isEqual(value, other)
-    					});
-  					})
-				});
-			}
-			
-			function initialize(spec) {
-				size = spec.size
-				loadLibraries(spec.url)
-				mixinLodashIndexOf()
-			}
-			
-			function makeLook(arena) {
-				return function look(pos) {
-					var x = pos[0], y = pos[1]
-					return (x < 0) || (x >= size) || (y < 0) || (y >= size) ||
-						_.contains(arena[x], y)
-				}
-			}
-			
-			var directions = [[1, 0], [-1, 0], [0, -1], [0, 1]]
-			
-			function move(pos, delta) {
-				return [pos[0] + delta[0], pos[1] + delta[1]]
-			}
-			
-			function turnLeft(dir) {
-				return [dir[1], -dir[0]]
-			}
-			
-			function turnRight(dir) {
-				return [-dir[1], dir[0]]
-			}
-			
-			var W = (function() {
-				// INJECTED BOT CODE
-				<%= body %>
-				
-				return {
-					name: name,
-					strategy: strategy
-				}
-			})()
-	
-			onmessage = function(m) {
-				switch (m.data.cmd) {
-					case 'name':
-						initialize(m.data.args)
-						postMessage({cmd: 'name', args: W.name})
-						break
-					case 'move':
-						postMessage({ cmd: 'recv', args: m.data.args.echo })
-						postMessage({ cmd: 'move', args:
-							W.strategy(makeLook(m.data.args.arena), m.data.args.state)
-						})
-						break
-					default:
-				}
-			}
-		})()
-	</script>
+    <!-- build:css styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body>
+
+    <div class="futuron">
+      Futuron
+    </div>
+    <div class="grid-and-legend clearfix">
+      <div id="grid"></div>
+      <div id="legend"></div>
+    </div>
+    <div id="term"></div>
+    
+    <script src="bower_components/requirejs/require.js"
+            data-main="scripts/main"></script>
+  </body>
 </html>

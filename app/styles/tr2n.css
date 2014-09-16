@@ -4,11 +4,11 @@
 
 @font-face {
     font-family: 'tr2ntr2n';
-    src: url('tr2n-webfont.eot');
-    src: url('tr2n-webfont.eot?#iefix') format('embedded-opentype'),
-         url('tr2n-webfont.woff') format('woff'),
-         url('tr2n-webfont.ttf') format('truetype'),
-         url('tr2n-webfont.svg#tr2ntr2n') format('svg');
+    src: url('../fonts/tr2n-webfont.eot');
+    src: url('../fonts/tr2n-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/tr2n-webfont.woff') format('woff'),
+         url('../fonts/tr2n-webfont.ttf') format('truetype'),
+         url('../fonts/tr2n-webfont.svg#tr2ntr2n') format('svg');
     font-weight: normal;
     font-style: normal;
 

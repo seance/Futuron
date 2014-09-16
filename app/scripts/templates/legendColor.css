@@ -1,0 +1,4 @@
+.legend-color-<%=id%> {
+  background-color: hsl(<%=hue%>, 100%, 50%);
+  box-shadow: 0 0 15px hsl(<%=hue%>, 100%, 50%);
+}

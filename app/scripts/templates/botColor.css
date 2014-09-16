@@ -1,0 +1,7 @@
+.bot-color-<%=id%> {
+  background-color: hsl(<%=hue%>, 100%, 50%);
+  box-shadow: 0 0 15px hsl(<%=hue%>, 100%, 50%);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  position: relative;
+  z-index: 3;
+}
