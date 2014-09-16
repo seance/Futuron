@@ -31,7 +31,7 @@ the following options:
   * As a full URL referencing the bot script file (1)
   
   A bot's code is wrapped in a Web Worker with some helpers, detailed in the bot
-  template file in app/scripts/bot.js.
+  template file in app/scripts/bots/bot.js.
   
   (1) The bot file must be served with CORS enabled
   
